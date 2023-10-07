@@ -1,23 +1,39 @@
-import React, { useState } from 'react'
-import { useDispatch } from 'react-redux';
-import { saveProducts } from '../features/productSlice';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { getProducts, productSelectors, updateProducts } from '../features/productSlice';
+import { useParams, useNavigate } from 'react-router';
 
-const AddProduct = () => {
+
+const EditProduct = () => {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const {id} = useParams();
 
-  const createProduct = async (e) => {
+  const product = useSelector((state) => productSelectors.selectById(state, id));
+
+  useEffect(() => {
+    dispatch(getProducts());
+  }, [dispatch])
+
+  useEffect(() => {
+    if(product) {
+      setTitle(product.title)
+      setPrice(product.price)
+    }
+  }, [product])
+
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    await dispatch(saveProducts({title, price}));
-    navigate('/')
+    await dispatch(updateProducts({id, title, price}));
+    navigate('/');
   }
+
 
   return (
     <div>
-      <form onSubmit={createProduct} className='box mt-5'>
+      <form onSubmit={handleUpdate}  className='box mt-5'>
         <div className="field">
           <label className='label'>Title</label>
           <div className="control">
@@ -33,7 +49,7 @@ const AddProduct = () => {
           </div>
         </div>
         <div className="field">
-          <button className='button is-success'>Submit</button>
+          <button className='button is-success'>Update </button>
         </div>
 
       </form>
@@ -41,4 +57,4 @@ const AddProduct = () => {
   )
 }
 
-export default AddProduct
+export default EditProduct
